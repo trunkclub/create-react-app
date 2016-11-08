@@ -114,6 +114,11 @@ module.exports = {
         test: /\.(js|jsx|es6)$/,
         loader: 'eslint',
         include: paths.appSrc
+      },
+      {
+        test: /\.svg$/,
+        loaders: 'svgo',
+        include: paths.appSrc
       }
     ],
     loaders: [

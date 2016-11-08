@@ -96,8 +96,6 @@ module.exports = {
   },
   // @remove-on-eject-end
   module: {
-    // First, run the linter.
-    // It's important to do this before Babel processes the JS.
     loaders: [
       // Process JS with Babel.
       {
