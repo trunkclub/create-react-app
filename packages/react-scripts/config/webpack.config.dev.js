@@ -95,13 +95,14 @@ module.exports = {
   // directory of `react-scripts` itself rather than the project directory.
   resolveLoader: {
     root: paths.ownNodeModules,
+    fallback: paths.appNodeModules,
   },
   // @remove-on-eject-end
   module: {
     noParse: [/\.elm$/],
     preLoaders: [
       {
-        loader: 'source-map',
+        loader: 'source-map-loader',
         test: /\.(jsx?|es6)$/,
         include: function (abs) {
           const rel = path.relative(paths.appSrc, abs)
@@ -109,7 +110,7 @@ module.exports = {
         }
       },
       {
-        loader: 'eslint',
+        loader: 'eslint-loader',
         test: /\.(jsx?|es6)$/,
         include: paths.appSrc,
         query: {
