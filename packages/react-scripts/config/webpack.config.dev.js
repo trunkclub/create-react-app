@@ -148,7 +148,7 @@ module.exports = {
           /\.elm$/,
           /\.svg$/
         ],
-        loader: 'url',
+        loader: 'url-loader',
         query: {
           limit: 10000,
           name: 'static/media/[name].[hash:8].[ext]'
@@ -158,7 +158,7 @@ module.exports = {
       {
         test: /\.(js|jsx|es6)$/,
         include: paths.appSrc,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
           // @remove-on-eject-begin
           babelrc: false,
@@ -173,12 +173,12 @@ module.exports = {
       {
         test: /\.elm/,
         include: paths.appSrc,
-        loader: 'elm-webpack'
+        loader: 'elm-webpack-loader'
       },
       {
         test: /\.(coffee|cjsx)$/,
         include: paths.appSrc,
-        loaders: ['coffee', 'cjsx']
+        loaders: ['coffee-loader', 'cjsx-loader']
       },
       // "postcss" loader applies autoprefixer to our CSS.
       // "css" loader resolves paths in CSS and adds assets as dependencies.
@@ -187,18 +187,18 @@ module.exports = {
       // in development "style" loader enables hot editing of CSS.
       {
         test: /\.s?css$/,
-        loader: 'style!css?importLoaders=1&sourceMap!postcss!sass?sourceMap'
+        loader: 'style-loader!css-loader?importLoaders=1&sourceMap!postcss-loader!sass-loader?sourceMap'
       },
       // JSON is not enabled by default in Webpack but both Node and Browserify
       // allow it implicitly so we also enable it.
       {
         test: /\.json$/,
-        loader: 'json'
+        loader: 'json-loader'
       },
       // "file" loader for svg
       {
         test: /\.svg$/,
-        loader: 'file',
+        loader: 'file-loader',
         query: {
           name: 'static/media/[name].[hash:8].[ext]'
         }
