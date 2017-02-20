@@ -3,10 +3,14 @@ const path = require('path');
 function getVersions(packagePath, modulesPath) {
   try {
     const pkg = require(packagePath);
-    const versions = Object.keys(pkg.dependencies)
+    const pkgNames = [].concat(
+      Object.keys(pkg.dependencies || {}),
+      Object.keys(pkg.devDependencies || {})
+    )
+    const versions = pkgNames
       .filter(name => name.startsWith('@trunkclub/'))
       .reduce((acc, name) => {
-        const modulePath = `${modulesPath}/${name}/package.json`;
+        const modulePath = path.join(modulesPath, name, 'package.json');
         try {
           return Object.assign({}, acc, {
             [name]: require(modulePath).version
