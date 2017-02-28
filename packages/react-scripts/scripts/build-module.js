@@ -74,6 +74,8 @@ if (outDirIdx !== -1) {
 }
 
 var result = lint();
+// Clear previous build artifacts before we start
+fs.removeSync(paths.appBuild);
 fs.walkSync(paths.appSrc).forEach(function (filePath) {
   processFile(path.relative(paths.appSrc, filePath));
 });
