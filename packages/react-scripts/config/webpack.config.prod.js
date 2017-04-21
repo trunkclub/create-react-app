@@ -17,6 +17,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin');
 const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer');
 const paths = require('./paths');
 const path = require('path');
 const getClientEnvironment = require('./env');
@@ -341,6 +342,13 @@ module.exports = {
     // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
     new ExtractTextPlugin({
       filename: cssFilename,
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      reportFilename: '../artifacts/bundle-report.html',
+      openAnalyzer: false,
+      generateStatsFile: true,
+      statsFilename: '../artifacts/stats.json',
     }),
     // Generate a manifest file which contains a mapping of all asset filenames
     // to their corresponding output file so that tools can pick it up without
