@@ -8,18 +8,18 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 // @remove-on-eject-end
-'use strict';
+'use strict'
 
-const chalk = require('chalk');
-const historyApiFallback = require('connect-history-api-fallback');
-const httpProxyMiddleware = require('http-proxy-middleware');
-const paths = require('../../config/paths');
+const chalk = require('chalk')
+const historyApiFallback = require('connect-history-api-fallback')
+const httpProxyMiddleware = require('http-proxy-middleware')
+const paths = require('../../config/paths')
 
 // We need to provide a custom onError function for httpProxyMiddleware.
 // It allows us to log custom error messages on the console.
 function onProxyError(proxy) {
   return (err, req, res) => {
-    const host = req.headers && req.headers.host;
+    const host = req.headers && req.headers.host
     console.log(
       chalk.red('Proxy error:') +
         ' Could not proxy request ' +
@@ -29,18 +29,18 @@ function onProxyError(proxy) {
         ' to ' +
         chalk.cyan(proxy) +
         '.'
-    );
+    )
     console.log(
       'See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (' +
         chalk.cyan(err.code) +
         ').'
-    );
-    console.log();
+    )
+    console.log()
 
     // And immediately send the proper error response to the client.
     // Otherwise, the request will eventually timeout with ERR_EMPTY_RESPONSE on the client side.
     if (res.writeHead && !res.headersSent) {
-      res.writeHead(500);
+      res.writeHead(500)
     }
     res.end(
       'Proxy error: Could not proxy request ' +
@@ -52,14 +52,14 @@ function onProxyError(proxy) {
         ' (' +
         err.code +
         ').'
-    );
-  };
+    )
+  }
 }
 
 module.exports = function addWebpackMiddleware(devServer) {
   // `proxy` lets you to specify a fallback server during development.
   // Every unrecognized request will be forwarded to it.
-  const proxy = require(paths.appPackageJson).proxy;
+  const proxy = require(paths.appPackageJson).proxy
   devServer.use(
     historyApiFallback({
       // Paths with dots should still use the history fallback.
@@ -74,29 +74,29 @@ module.exports = function addWebpackMiddleware(devServer) {
       // If this heuristic doesn’t work well for you, don’t use `proxy`.
       htmlAcceptHeaders: proxy ? ['text/html'] : ['text/html', '*/*'],
     })
-  );
+  )
   if (proxy) {
     if (typeof proxy !== 'string') {
       console.log(
         chalk.red('When specified, "proxy" in package.json must be a string.')
-      );
+      )
       console.log(
         chalk.red('Instead, the type of "proxy" was "' + typeof proxy + '".')
-      );
+      )
       console.log(
         chalk.red(
           'Either remove "proxy" from package.json, or make it a string.'
         )
-      );
-      process.exit(1);
+      )
+      process.exit(1)
       // Test that proxy url specified starts with http:// or https://
     } else if (!/^http(s)?:\/\//.test(proxy)) {
       console.log(
         chalk.red(
           'When "proxy" is specified in package.json it must start with either http:// or https://'
         )
-      );
-      process.exit(1);
+      )
+      process.exit(1)
     }
 
     // Otherwise, if proxy is specified, we will let it handle any request.
@@ -105,7 +105,7 @@ module.exports = function addWebpackMiddleware(devServer) {
     // - /*.hot-update.json (WebpackDevServer uses this too for hot reloading)
     // - /sockjs-node/* (WebpackDevServer uses this for hot reloading)
     // Tip: use https://jex.im/regulex/ to visualize the regex
-    const mayProxy = /^(?!\/(index\.html$|.*\.hot-update\.json$|sockjs-node\/)).*$/;
+    const mayProxy = /^(?!\/(index\.html$|.*\.hot-update\.json$|sockjs-node\/)).*$/
 
     // Pass the scope regex both to Express and to the middleware for proxying
     // of both HTTP and WebSockets to work without false positives.
@@ -117,7 +117,7 @@ module.exports = function addWebpackMiddleware(devServer) {
         // requests. To prevent CORS issues, we have to change
         // the Origin to match the target URL.
         if (proxyReq.getHeader('origin')) {
-          proxyReq.setHeader('origin', proxy);
+          proxyReq.setHeader('origin', proxy)
         }
       },
       onError: onProxyError(proxy),
@@ -125,16 +125,16 @@ module.exports = function addWebpackMiddleware(devServer) {
       changeOrigin: true,
       ws: true,
       xfwd: true,
-    });
-    devServer.use(mayProxy, hpm);
+    })
+    devServer.use(mayProxy, hpm)
 
     // Listen for the websocket 'upgrade' event and upgrade the connection.
     // If this is not done, httpProxyMiddleware will not try to upgrade until
     // an initial plain HTTP request is made.
-    devServer.listeningApp.on('upgrade', hpm.upgrade);
+    devServer.listeningApp.on('upgrade', hpm.upgrade)
   }
 
   // Finally, by now we have certainly resolved the URL.
   // It may be /index.html, so let the dev server try serving it again.
-  devServer.use(devServer.middleware);
-};
+  devServer.use(devServer.middleware)
+}

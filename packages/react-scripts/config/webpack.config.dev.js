@@ -77,7 +77,7 @@ module.exports = {
     // if there are any conflicts. This matches Node resolution mechanism.
     // https://github.com/facebookincubator/create-react-app/issues/253
     modules: [paths.appSrc, 'node_modules', paths.appNodeModules].concat(
-      paths.nodePaths,
+      paths.nodePaths
     ),
     // These are the reasonable defaults supported by the Node ecosystem.
     // We also include JSX as a common component filename extension to support

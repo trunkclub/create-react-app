@@ -29,7 +29,7 @@ function run(s) {
       var result = spawn.sync(
         'node',
         [require.resolve('../scripts/' + s)].concat(args),
-        { stdio: 'inherit' },
+        { stdio: 'inherit' }
       )
       process.exit(result.status)
       break
@@ -50,7 +50,7 @@ function run(s) {
       console.log(
         'The "' +
           s +
-          '" task is no longer separate from the "build", "start", and "test" tasks.',
+          '" task is no longer separate from the "build", "start", and "test" tasks.'
       )
       break
     case 'flow':

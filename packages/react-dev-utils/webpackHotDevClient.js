@@ -133,7 +133,7 @@ var connection = new SockJS(
     port: process.env.PORT || '3000',
     // Hardcoded in WebpackDevServer
     pathname: '/sockjs-node',
-  }),
+  })
 )
 
 // Unlike WebpackDevServer client, we won't try to reconnect
@@ -141,7 +141,7 @@ var connection = new SockJS(
 // when developer stops the server.
 connection.onclose = function() {
   console.info(
-    'The development server has disconnected.\nRefresh the page if necessary.',
+    'The development server has disconnected.\nRefresh the page if necessary.'
   )
 }
 
@@ -311,7 +311,7 @@ function tryApplyUpdates(onHotUpdateSuccess) {
       },
       function(err) {
         handleApplyUpdates(err, null)
-      },
+      }
     )
   }
 }

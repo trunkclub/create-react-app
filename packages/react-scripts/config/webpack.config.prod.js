@@ -15,7 +15,7 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const ManifestPlugin = require('webpack-manifest-plugin')
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
+const InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin')
 const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin')
 const paths = require('./paths')
 const getClientEnvironment = require('./env')
@@ -80,7 +80,7 @@ module.exports = {
     // if there are any conflicts. This matches Node resolution mechanism.
     // https://github.com/facebookincubator/create-react-app/issues/253
     modules: [paths.appSrc, 'node_modules', paths.appNodeModules].concat(
-      paths.nodePaths,
+      paths.nodePaths
     ),
     // These are the reasonable defaults supported by the Node ecosystem.
     // We also include JSX as a common component filename extension to support
@@ -241,8 +241,8 @@ module.exports = {
                 },
               ],
             },
-            extractTextPluginOptions,
-          ),
+            extractTextPluginOptions
+          )
         ),
         // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
       },
@@ -284,8 +284,8 @@ module.exports = {
                 },
               ],
             },
-            extractTextPluginOptions,
-          ),
+            extractTextPluginOptions
+          )
         ),
         // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
       },

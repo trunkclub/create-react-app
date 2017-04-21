@@ -57,7 +57,7 @@ function run(port) {
 
   // Create a webpack compiler that is configured with custom messages.
   const compiler = createWebpackCompiler(config, function onReady(
-    showInstructions,
+    showInstructions
   ) {
     if (!showInstructions) {
       return
@@ -69,7 +69,7 @@ function run(port) {
     console.log()
     console.log('Note that the development build is not optimized.')
     console.log(
-      `To create a production build, use ${chalk.cyan(`${cli} run build`)}.`,
+      `To create a production build, use ${chalk.cyan(`${cli} run build`)}.`
     )
     console.log()
   })
@@ -108,7 +108,7 @@ detect(DEFAULT_PORT).then(port => {
     const question =
       chalk.yellow(
         `Something is already running on port ${DEFAULT_PORT}.` +
-          `${existingProcess ? ` Probably:\n  ${existingProcess}` : ''}`,
+          `${existingProcess ? ` Probably:\n  ${existingProcess}` : ''}`
       ) + '\n\nWould you like to run the app on another port instead?'
 
     prompt(question, true).then(shouldChangePort => {
@@ -118,7 +118,7 @@ detect(DEFAULT_PORT).then(port => {
     })
   } else {
     console.log(
-      chalk.red(`Something is already running on port ${DEFAULT_PORT}.`),
+      chalk.red(`Something is already running on port ${DEFAULT_PORT}.`)
     )
   }
 })

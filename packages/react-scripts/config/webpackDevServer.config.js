@@ -8,13 +8,13 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 // @remove-on-eject-end
-'use strict';
+'use strict'
 
-const config = require('./webpack.config.dev');
-const paths = require('./paths');
+const config = require('./webpack.config.dev')
+const paths = require('./paths')
 
-const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
-const host = process.env.HOST || 'localhost';
+const protocol = process.env.HTTPS === 'true' ? 'https' : 'http'
+const host = process.env.HOST || 'localhost'
 
 module.exports = {
   // Enable gzip compression of generated files.
@@ -60,4 +60,4 @@ module.exports = {
   https: protocol === 'https',
   host: host,
   overlay: false,
-};
+}

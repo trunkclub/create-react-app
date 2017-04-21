@@ -45,9 +45,9 @@ argv.push(
     createJestConfig(
       relativePath => path.resolve(__dirname, '..', relativePath),
       path.resolve(paths.appSrc, '..'),
-      false,
-    ),
-  ),
+      false
+    )
+  )
 )
 // @remove-on-eject-end
 jest.run(argv)
