@@ -84,10 +84,10 @@ if (shouldClean) {
   fs.removeSync(paths.appBuild);
 }
 
+var result = lint();
 fs.walkSync(paths.appSrc).forEach(function (filePath) {
   processFile(path.relative(paths.appSrc, filePath));
 });
-var result = lint();
 
 var isWatch = args.indexOf('-w') !== -1 || args.indexOf('--watch') !== -1
 if (!isWatch) process.exit(result.status);
@@ -102,7 +102,7 @@ var watcher = chokidar.watch([
 
 watcher.on('all', function (event, filePath) {
   if (event === 'add' || event === 'change') {
-    processFile(filePath);
     lint();
+    processFile(filePath);
   }
 })
