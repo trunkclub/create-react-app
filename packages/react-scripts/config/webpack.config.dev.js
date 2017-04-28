@@ -8,31 +8,30 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 // @remove-on-eject-end
+'use strict';
 
-var autoprefixer = require('autoprefixer');
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin');
-var WatchMissingNodeModulesPlugin = require('@trunkclub/react-dev-utils/WatchMissingNodeModulesPlugin');
-var ProgressBarPlugin = require('progress-bar-webpack-plugin');
-var TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
-var getClientEnvironment = require('./env');
-var path = require('path');
-var paths = require('./paths');
+const autoprefixer = require('autoprefixer');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin');
+const WatchMissingNodeModulesPlugin = require('@trunkclub/react-dev-utils/WatchMissingNodeModulesPlugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
+const getClientEnvironment = require('./env');
+const path = require('path');
+const paths = require('./paths');
 
-var publicUrl = 'http://localhost:' + (process.env.PORT || '3000');
-var publicPath = publicUrl + '/';
-var env = getClientEnvironment(publicUrl);
+const publicUrl = 'http://localhost:' + (process.env.PORT || '3000');
+const publicPath = publicUrl + '/';
+const env = getClientEnvironment(publicUrl);
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
 module.exports = {
-  // This makes the bundle appear split into separate modules in the devtools.
-  // We don't use source maps here because they can be confusing:
-  // https://github.com/facebookincubator/create-react-app/issues/343#issuecomment-237241875
-  // You may want 'cheap-module-source-map' instead if you prefer source maps.
+  // You may want 'eval' instead if you prefer to see the compiled output in DevTools.
+  // See the discussion in https://github.com/facebookincubator/create-react-app/issues/343.
   devtool: 'eval-source-map',
   // These are the "entry points" to our application.
   // This means they will be the "root" imports that are included in JS bundle.
@@ -51,8 +50,10 @@ module.exports = {
     require.resolve('@trunkclub/react-dev-utils/webpackHotDevClient'),
     // We ship a few polyfills by default:
     require.resolve('babel-polyfill'),
+    // Errors should be considered fatal in development
+    require.resolve('@trunkclub/react-dev-utils/crashOverlay'),
     // Finally, this is your app's code:
-    paths.appIndexJs
+    paths.appIndexJs,
     // We include the app code last so that if there is a runtime error during
     // initialization, it doesn't blow up the WebpackDevServer client, and
     // changing JS code would still trigger a refresh.
@@ -67,100 +68,123 @@ module.exports = {
     // containing code from all our entry points, and the Webpack runtime.
     filename: 'static/js/bundle.js',
     // This is the URL that app is served from. We use "/" in development.
-    publicPath: publicPath
+    publicPath: publicPath,
   },
   resolve: {
     // This allows you to set a fallback for where Webpack should look for modules.
     // We read `NODE_PATH` environment variable in `paths.js` and pass paths here.
-    // We use `fallback` instead of `root` because we want `node_modules` to "win"
-    // if there any conflicts. This matches Node resolution mechanism.
+    // We placed these paths second because we want `node_modules` to "win"
+    // if there are any conflicts. This matches Node resolution mechanism.
     // https://github.com/facebookincubator/create-react-app/issues/253
-    fallback: [].concat(paths.appNodeModules, paths.nodePaths),
-    root: paths.appSrc,
+    modules: [paths.appSrc, 'node_modules', paths.appNodeModules].concat(
+      paths.nodePaths
+    ),
     // These are the reasonable defaults supported by the Node ecosystem.
     // We also include JSX as a common component filename extension to support
     // some tools, although we do not recommend using it, see:
     // https://github.com/facebookincubator/create-react-app/issues/290
-    extensions: ['.js', '.json', '.jsx', '.es6', '.coffee', '.cjsx', ''],
+    extensions: ['.js', '.json', '.jsx', '.es6', '.coffee', '.cjsx'],
     alias: {
       // This will prevent the multiple React instances issue (invariant). This mostly
       // occurs when locally linking another npm package that requires React.
       react: path.resolve(paths.appNodeModules, 'react'),
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
-      'react-native': 'react-native-web'
-    }
+      'react-native': 'react-native-web',
+    },
   },
   // @remove-on-eject-begin
   // Resolve loaders (webpack plugins for CSS, images, transpilation) from the
   // directory of `react-scripts` itself rather than the project directory.
   resolveLoader: {
-    root: paths.ownNodeModules,
-    fallback: paths.appNodeModules,
+    modules: [
+      paths.ownNodeModules,
+      // Lerna hoists everything, so we need to look in our app directory
+      paths.appNodeModules,
+    ],
   },
   // @remove-on-eject-end
   module: {
-    noParse: [/\.elm$/],
-    preLoaders: [
+    rules: [
+      // First, run the linter.
+      // It's important to do this before Babel processes the JS.
       {
-        loader: 'source-map-loader',
         test: /\.(jsx?|es6)$/,
-        include: function (abs) {
-          const rel = path.relative(paths.appSrc, abs)
-          return /@trunkclub/.test(rel)
-        }
+        enforce: 'pre',
+        use: [
+          {
+            loader: 'source-map-loader',
+          },
+        ],
+        include: abs => {
+          const rel = path.relative(paths.appSrc, abs);
+          return /@trunkclub/.test(rel);
+        },
       },
       {
-        loader: 'eslint-loader',
         test: /\.(jsx?|es6)$/,
+        enforce: 'pre',
+        use: [
+          {
+            // @remove-on-eject-begin
+            // Point ESLint to our predefined config.
+            options: {
+              baseConfig: {
+                extends: ['@trunkclub/eslint-config'],
+              },
+              emitWarning: true,
+              useEslintrc: false,
+            },
+            // @remove-on-eject-end
+            loader: 'eslint-loader',
+          },
+        ],
         include: paths.appSrc,
-        query: {
-          configFile: path.join(__dirname, '../.eslintrc'),
-          // All warnings and errors are passed to webpack as warnings to allow
-          // webpack compilation to continue.
-          emitWarning: true,
-          useEslintrc: false
-        }
-      }
-    ],
-    loaders: [
-      // Default loader: load all assets that are not handled
-      // by other loaders with the url loader.
-      // Note: This list needs to be updated with every change of extensions
-      // the other loaders match.
-      // E.g., when adding a loader for a new supported file extension,
-      // we need to add the supported extension to this loader too.
-      // Add one new line in `exclude` for each loader.
-      //
+      },
+      // ** ADDING/UPDATING LOADERS **
+      // The "url" loader handles all assets unless explicitly excluded.
+      // The `exclude` list *must* be updated with every change to loader extensions.
+      // When adding a new loader, you must add its `test`
+      // as a new entry in the `exclude` list for "url" loader.
+
       // "file" loader makes sure those assets get served by WebpackDevServer.
       // When you `import` an asset, you get its (virtual) filename.
       // In production, they would get copied to the `build` folder.
+      {
+        exclude: [
+          /\.html$/,
+          /\.(jsx?|es6)$/,
+          /\.s?css$/,
+          /\.json$/,
+          /\.bmp$/,
+          /\.gif$/,
+          /\.jpe?g$/,
+          /\.png$/,
+          /\.coffee$/,
+          /\.cjsx$/,
+        ],
+        loader: 'file-loader',
+        options: {
+          name: 'static/media/[name].[hash:8].[ext]',
+        },
+      },
       // "url" loader works like "file" loader except that it embeds assets
       // smaller than specified limit in bytes as data URLs to avoid requests.
       // A missing `test` is equivalent to a match.
       {
-        exclude: [
-          /\.html$/,
-          /\.(js|jsx|es6)$/,
-          /\.s?css$/,
-          /\.json$/,
-          /\.coffee$/,
-          /\.cjsx$/,
-          /\.elm$/,
-          /\.svg$/
-        ],
+        test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
         loader: 'url-loader',
-        query: {
+        options: {
           limit: 10000,
-          name: 'static/media/[name].[hash:8].[ext]'
-        }
+          name: 'static/media/[name].[hash:8].[ext]',
+        },
       },
       // Process JS with Babel.
       {
-        test: /\.(js|jsx|es6)$/,
+        test: /\.(jsx?|es6)$/,
         include: paths.appSrc,
         loader: 'babel-loader',
-        query: {
+        options: {
           // @remove-on-eject-begin
           babelrc: false,
           presets: [require.resolve('babel-preset-trunkclub')],
@@ -168,90 +192,115 @@ module.exports = {
           // This is a feature of `babel-loader` for webpack (not Babel itself).
           // It enables caching results in ./node_modules/.cache/babel-loader/
           // directory for faster rebuilds.
-          cacheDirectory: true
-        }
-      },
-      {
-        test: /\.elm/,
-        include: paths.appSrc,
-        loader: 'elm-webpack-loader'
+          cacheDirectory: true,
+        },
       },
       {
         test: /\.(coffee|cjsx)$/,
-        include: paths.appSrc,
-        loaders: ['coffee-loader', 'cjsx-loader']
+        use: ['coffee-loader', 'cjsx-loader'],
       },
       // "postcss" loader applies autoprefixer to our CSS.
       // "css" loader resolves paths in CSS and adds assets as dependencies.
       // "style" loader turns CSS into JS modules that inject <style> tags.
       // In production, we use a plugin to extract that CSS to a file, but
       // in development "style" loader enables hot editing of CSS.
-      // If a file is named [FILE].module.s?css instead of [FILE].s?css
-      // then we will process it as a CSS Module (https://github.com/css-modules/css-modules).
       {
         test: /\.module\.s?css$/,
-        loader: 'style-loader!css-loader?importLoaders=1&modules&localIdentName=[path][name]__[local]--[hash:base64:8]&sourceMap!postcss-loader!sass-loader?sourceMap'
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1,
+              modules: true,
+              localIdentName: '[path][name]__[local]--[hash:base64:8]',
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+              plugins: () => [
+                autoprefixer({
+                  browsers: [
+                    '>1%',
+                    'last 4 versions',
+                    'Firefox ESR',
+                    'not ie < 9', // React doesn't support IE8 anyway
+                  ],
+                }),
+              ],
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
       },
       {
-        /* test: /(?<!\.module)\.s?css$/,*/
-        test: /\.s?css$/,
         exclude: /\.module\.s?css$/,
-        loader: 'style-loader!css-loader?importLoaders=1&sourceMap!postcss-loader!sass-loader?sourceMap'
+        test: /\.s?css$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+              plugins: () => [
+                autoprefixer({
+                  browsers: [
+                    '>1%',
+                    'last 4 versions',
+                    'Firefox ESR',
+                    'not ie < 9', // React doesn't support IE8 anyway
+                  ],
+                }),
+              ],
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
       },
-      // JSON is not enabled by default in Webpack but both Node and Browserify
-      // allow it implicitly so we also enable it.
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
-      },
-      // "file" loader for svg
-      {
-        test: /\.svg$/,
-        loader: 'file-loader',
-        query: {
-          name: 'static/media/[name].[hash:8].[ext]'
-        }
-      }
-    ]
-  },
-  // We use PostCSS for autoprefixing only.
-  postcss: function() {
-    return [
-      autoprefixer({
-        browsers: [
-          '>1%',
-          'last 4 versions',
-          'Firefox ESR',
-          'not ie < 9', // React doesn't support IE8 anyway
-        ]
-      }),
-    ];
+      // ** STOP ** Are you adding a new loader?
+      // Remember to add the new extension(s) to the "url" loader exclusion list.
+    ],
   },
   plugins: [
     new ProgressBarPlugin({
-      summary: false
+      summary: false,
     }),
-    // Makes the public URL available as %PUBLIC_URL% in index.html, e.g.:
+    // Makes some environment variables available in index.html.
+    // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In development, this will be an empty string.
-    new InterpolateHtmlPlugin(Object.keys(env['process.env']).reduce(function (e, key) {
-      e[key] = JSON.parse(env['process.env'][key])
-      return e
-    }, {})),
+    new InterpolateHtmlPlugin(env.raw),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
     }),
-    // This will add a file to the build named 'tcversions.json' to assist
-    // with debugging apps that are in staging and production.
     new TrunkClubVersionsPlugin({
       packagePath: paths.appPackageJson,
       modulesPath: paths.appNodeModules,
     }),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
-    new webpack.DefinePlugin(env),
+    new webpack.DefinePlugin(env.stringified),
     // This is necessary to emit hot updates (currently CSS only):
     new webpack.HotModuleReplacementPlugin(),
     // Watcher doesn't work well if you mistype casing in a path so we use
@@ -263,13 +312,19 @@ module.exports = {
     // to restart the development server for Webpack to discover it. This plugin
     // makes the discovery automatic so you don't have to restart.
     // See https://github.com/facebookincubator/create-react-app/issues/186
-    new WatchMissingNodeModulesPlugin(paths.appNodeModules)
+    new WatchMissingNodeModulesPlugin(paths.appNodeModules),
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
   node: {
     fs: 'empty',
     net: 'empty',
-    tls: 'empty'
-  }
+    tls: 'empty',
+  },
+  // Turn off performance hints during development because we don't do any
+  // splitting or minification in interest of speed. These warnings become
+  // cumbersome.
+  performance: {
+    hints: false,
+  },
 };
