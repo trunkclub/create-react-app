@@ -8,23 +8,23 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 // @remove-on-eject-end
-'use strict'
+'use strict';
 
-const autoprefixer = require('autoprefixer')
-const webpack = require('webpack')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin')
-const InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin')
-const WatchMissingNodeModulesPlugin = require('@trunkclub/react-dev-utils/WatchMissingNodeModulesPlugin')
-const ProgressBarPlugin = require('progress-bar-webpack-plugin')
-const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin')
-const getClientEnvironment = require('./env')
-const path = require('path')
-const paths = require('./paths')
+const autoprefixer = require('autoprefixer');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin');
+const WatchMissingNodeModulesPlugin = require('@trunkclub/react-dev-utils/WatchMissingNodeModulesPlugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
+const getClientEnvironment = require('./env');
+const path = require('path');
+const paths = require('./paths');
 
-const publicUrl = 'http://localhost:' + (process.env.PORT || '3000')
-const publicPath = publicUrl + '/'
-const env = getClientEnvironment(publicUrl)
+const publicUrl = 'http://localhost:' + (process.env.PORT || '3000');
+const publicPath = publicUrl + '/';
+const env = getClientEnvironment(publicUrl);
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -117,8 +117,8 @@ module.exports = {
           },
         ],
         include: abs => {
-          const rel = path.relative(paths.appSrc, abs)
-          return /@trunkclub/.test(rel)
+          const rel = path.relative(paths.appSrc, abs);
+          return /@trunkclub/.test(rel);
         },
       },
       {
@@ -153,7 +153,7 @@ module.exports = {
       {
         exclude: [
           /\.html$/,
-          /\.(js|jsx|es6)$/,
+          /\.(jsx?|es6)$/,
           /\.s?css$/,
           /\.json$/,
           /\.bmp$/,
@@ -181,7 +181,7 @@ module.exports = {
       },
       // Process JS with Babel.
       {
-        test: /\.(js|jsx)$/,
+        test: /\.(jsx?|es6)$/,
         include: paths.appSrc,
         loader: 'babel-loader',
         options: {
@@ -327,4 +327,4 @@ module.exports = {
   performance: {
     hints: false,
   },
-}
+};

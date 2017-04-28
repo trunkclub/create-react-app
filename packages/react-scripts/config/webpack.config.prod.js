@@ -154,7 +154,7 @@ module.exports = {
       {
         exclude: [
           /\.html$/,
-          /\.(js|jsx|es6)$/,
+          /\.(jsx?|es6)$/,
           /\.s?css$/,
           /\.json$/,
           /\.bmp$/,
@@ -181,7 +181,7 @@ module.exports = {
       },
       // Process JS with Babel.
       {
-        test: /\.(js|jsx)$/,
+        test: /\.(jsx?|es6)$/,
         include: paths.appSrc,
         loader: 'babel-loader',
         // @remove-on-eject-begin
