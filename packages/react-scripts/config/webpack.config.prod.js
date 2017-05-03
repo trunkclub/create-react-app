@@ -113,7 +113,6 @@ module.exports = {
     // Resolve loaders (webpack plugins for CSS, images, transpilation) from the
     // directory of `react-scripts` itself rather than the project directory.
     root: paths.ownNodeModules,
-    moduleTemplates: ['*-loader'],
     // @remove-on-eject-end
     // Fallback to any hoisted modules when dealing with linked libraries
     fallback: paths.appNodeModules,
@@ -240,7 +239,7 @@ module.exports = {
     // TODO: consider separate config for production,
     // e.g. to enable no-console and no-debugger only in production.
     configFile: path.join(__dirname, '../eslintrc'),
-    useEslintrc: false
+    useEslintrc: false,
   },
   // @remove-on-eject-end
   // We use PostCSS for autoprefixing only.
@@ -262,10 +261,7 @@ module.exports = {
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In production, it will be an empty string unless you specify "homepage"
     // in `package.json`, in which case it will be the pathname of that URL.
-    new InterpolateHtmlPlugin(Object.keys(env['process.env']).reduce(function (e, key) {
-      e[key] = JSON.parse(env['process.env'][key])
-      return e
-    }, {})),
+    new InterpolateHtmlPlugin(env.raw),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,
@@ -293,7 +289,7 @@ module.exports = {
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.
     // Otherwise React will be compiled in the very slow development mode.
-    new webpack.DefinePlugin(env),
+    new webpack.DefinePlugin(env.stringified),
     // https://github.com/lodash/lodash-webpack-plugin
     new LodashModuleReplacementPlugin,
     // This helps ensure the builds are consistent if source hasn't changed:

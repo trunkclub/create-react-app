@@ -99,7 +99,6 @@ module.exports = {
     // Resolve loaders (webpack plugins for CSS, images, transpilation) from the
     // directory of `react-scripts` itself rather than the project directory.
     root: paths.ownNodeModules,
-    moduleTemplates: ['*-loader'],
     // @remove-on-eject-end
     // Fallback to any hoisted modules when dealing with linked libraries
     fallback: paths.appNodeModules
@@ -119,13 +118,6 @@ module.exports = {
         loader: 'eslint-loader',
         test: /\.(jsx?|es6)$/,
         include: paths.appSrc,
-        query: {
-          configFile: path.join(__dirname, '../.eslintrc'),
-          // All warnings and errors are passed to webpack as warnings to allow
-          // webpack compilation to continue.
-          emitWarning: true,
-          useEslintrc: false
-        }
       }
     ],
     loaders: [
@@ -215,6 +207,13 @@ module.exports = {
       // Remember to add the new extension(s) to the "url" loader exclusion list.
     ]
   },
+  // @remove-on-eject-begin
+  // Point ESLint to our predefined config.
+  eslint: {
+    configFile: path.join(__dirname, '../eslintrc'),
+    useEslintrc: false,
+  },
+  // @remove-on-eject-end
   // We use PostCSS for autoprefixing only.
   postcss: function() {
     return [
@@ -236,10 +235,7 @@ module.exports = {
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In development, this will be an empty string.
-    new InterpolateHtmlPlugin(Object.keys(env['process.env']).reduce(function (e, key) {
-      e[key] = JSON.parse(env['process.env'][key])
-      return e
-    }, {})),
+    new InterpolateHtmlPlugin(env.raw),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,
