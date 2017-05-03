@@ -212,6 +212,7 @@ module.exports = {
   eslint: {
     configFile: path.join(__dirname, '../eslintrc'),
     useEslintrc: false,
+    emitWarning: true,
   },
   // @remove-on-eject-end
   // We use PostCSS for autoprefixing only.
