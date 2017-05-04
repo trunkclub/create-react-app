@@ -11,6 +11,7 @@
 'use strict';
 
 var spawn = require('cross-spawn');
+var path = require('path');
 var checkNodeVersion = require('../utils/checkNodeVersion');
 var script = process.argv[2];
 var args = process.argv.slice(3);
@@ -25,6 +26,7 @@ function run (s) {
   case 'test':
   case 'build-module':
   case 'lint':
+  case 'prettier':
   case 'publish':
   case 'deploy':
     var result = spawn.sync(
