@@ -9,6 +9,8 @@
  */
 // @remove-on-eject-end
 
+'use strict';
+
 process.env.NODE_ENV = 'development';
 
 // Load environment variables from .env file. Suppress warnings using silent
@@ -23,17 +25,18 @@ var WebpackDevServer = require('webpack-dev-server');
 var historyApiFallback = require('connect-history-api-fallback');
 var httpProxyMiddleware = require('http-proxy-middleware');
 var detect = require('detect-port');
-var checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
+var checkRequiredFiles = require('@trunkclub/react-dev-utils/checkRequiredFiles');
 var clearConsole = require('@trunkclub/react-dev-utils/clearConsole');
 var formatWebpackMessages = require('@trunkclub/react-dev-utils/formatWebpackMessages');
 var getProcessForPort = require('@trunkclub/react-dev-utils/getProcessForPort');
 var pathExists = require('path-exists');
 var prompt = require('@trunkclub/react-dev-utils/prompt');
+var fs = require('fs');
 var config = require('../config/webpack.config.dev');
 var paths = require('../config/paths');
 var formatTime = require('../utils/formatTime');
 
-var useYarn = pathExists.sync(paths.yarnLockFile);
+var useYarn = fs.existsSync(paths.yarnLockFile);
 var cli = useYarn ? 'yarn' : 'npm';
 var isInteractive = process.stdout.isTTY;
 
@@ -43,7 +46,7 @@ if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
 }
 
 // Tools like Cloud9 rely on this.
-var DEFAULT_PORT = process.env.PORT || 3000;
+var DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
 var compiler;
 var handleCompile;
 var time = +new Date();
@@ -174,6 +177,14 @@ function addMiddleware(devServer) {
       console.log(chalk.red('Instead, the type of "proxy" was "' + typeof proxy + '".'));
       console.log(chalk.red('Either remove "proxy" from package.json, or make it a string.'));
       process.exit(1);
+      // Test that proxy url specified starts with http:// or https://
+    } else if (!/^http(s)?:\/\//.test(proxy)) {
+      console.log(
+        chalk.red(
+          'When "proxy" is specified in package.json it must start with either http:// or https://'
+        )
+      );
+      process.exit(1);
     }
 
     // Otherwise, if proxy is specified, we will let it handle any request.
@@ -189,7 +200,7 @@ function addMiddleware(devServer) {
     var hpm = httpProxyMiddleware(pathname => mayProxy.test(pathname), {
       target: proxy,
       logLevel: 'silent',
-      onProxyReq: function(proxyReq, req, res) {
+      onProxyReq: function(proxyReq) {
         // Browers may send Origin headers even with same-origin
         // requests. To prevent CORS issues, we have to change
         // the Origin to match the target URL.
@@ -200,7 +211,8 @@ function addMiddleware(devServer) {
       onError: onProxyError(proxy),
       secure: false,
       changeOrigin: true,
-      ws: true
+      ws: true,
+      xfwd: true
     });
     devServer.use(mayProxy, hpm);
 
@@ -229,7 +241,7 @@ function runDevServer(host, port, protocol) {
     // project directory is dangerous because we may expose sensitive files.
     // Instead, we establish a convention that only files in `public` directory
     // get served. Our build script will copy `public` into the `build` folder.
-    // In `index.html`, you can get URL of `public` folder with %PUBLIC_PATH%:
+    // In `index.html`, you can get URL of `public` folder with %PUBLIC_URL%:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In JavaScript code, you can access it with `process.env.PUBLIC_URL`.
     // Note that we only recommend to use `public` folder as an escape hatch
@@ -263,7 +275,7 @@ function runDevServer(host, port, protocol) {
   addMiddleware(devServer);
 
   // Launch WebpackDevServer.
-  devServer.listen(port, (err, result) => {
+  devServer.listen(port, host, err => {
     if (err) {
       return console.log(err);
     }
@@ -278,7 +290,7 @@ function runDevServer(host, port, protocol) {
 
 function run(port) {
   var protocol = process.env.HTTPS === 'true' ? "https" : "http";
-  var host = process.env.HOST || 'localhost';
+  var host = process.env.HOST || '0.0.0.0';
   setupCompiler(host, port, protocol);
   runDevServer(host, port, protocol);
 }
