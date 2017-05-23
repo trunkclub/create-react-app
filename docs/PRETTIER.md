@@ -5,6 +5,20 @@
 Prettier is available in @trunkclub/build version 7.2 and above. It will require a
 couple dependencies and a small update to the app's `package.json`.
 
+### Before Proceeding
+
+It might beneficial to run Prettier once on the app ahead of time,
+and then committing the formatted changes.
+
+This will ensure all diffs going forward are cleaner and easier to understand.
+Otherwise, diffs will have a lot of noise the first time a changed file is reformatted.
+
+This can be by running the following from your project root:
+
+```bash
+node_modules/.bin/tcweb-build prettier "src/**/*.{js,es6}"
+```
+
 ### Dependencies
 
 ```bash
