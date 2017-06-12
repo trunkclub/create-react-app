@@ -12,7 +12,6 @@ var args = process.argv.slice(argsIndex);
 var result = spawn.sync(
   path.resolve(__dirname, '../node_modules/.bin/prettier'),
   [
-    '--write',
     '--single-quote',
     '--no-semi',
     '--trailing-comma', 'all',
