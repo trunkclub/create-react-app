@@ -1,6 +1,6 @@
 {
   "name": "@trunkclub/build",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "upstream-version": "0.9.5",
   "description": "Configuration and scripts for Create React App. Fork maintained by Trunk Club",
   "repository": "trunkclub/create-react-app",
@@ -71,6 +71,7 @@
     "object-assign": "4.1.1",
     "path-exists": "2.1.0",
     "postcss-loader": "1.2.2",
+    "prettier": "^1.4.4",
     "progress-bar-webpack-plugin": "1.9.0",
     "promise": "7.1.1",
     "recursive-readdir": "2.1.0",
@@ -89,10 +90,15 @@
   "devDependencies": {
     "babel-runtime": "^6.11.6",
     "bundle-deps": "1.0.0",
-    "flow-runtime": "^0.12.0",
+    "husky": "^0.13.3",
+    "lint-staged": "^3.4.1",
     "publish": "^0.6.0",
     "react": "^15.3.0",
     "react-dom": "^15.3.0"
+  },
+  "peerDependencies": {
+    "husky": "^0.13.3",
+    "lint-staged": "^3.4.1"
   },
   "optionalDependencies": {
     "fsevents": "1.0.17"

@@ -25,6 +25,7 @@ function run (s) {
   case 'test':
   case 'build-module':
   case 'lint':
+  case 'prettier':
   case 'publish':
   case 'deploy':
     var result = spawn.sync(
