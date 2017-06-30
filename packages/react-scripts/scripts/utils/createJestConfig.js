@@ -32,7 +32,7 @@ module.exports = (resolve, rootDir, isEjecting) => {
       '^.+\\.(js|jsx|es6)$': isEjecting
         ? '<rootDir>/node_modules/babel-jest'
         : resolve('config/jest/babelTransform.js'),
-      '^.+\\.css$': resolve('config/jest/cssTransform.js'),
+      '^.+\\.s?css$': resolve('config/jest/cssTransform.js'),
       '^(?!.*\\.(js|jsx|css|json|es6|scss)$)': resolve('config/jest/fileTransform.js'),
     },
     transformIgnorePatterns: [
@@ -41,6 +41,8 @@ module.exports = (resolve, rootDir, isEjecting) => {
     moduleDirectories: ['src', 'node_modules'],
     moduleFileExtensions: ['js', 'json', 'es6', 'jsx'],
     moduleNameMapper: {
+      '^.+\\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': resolve('config/jest/FileStub.js'),
+      '^.+\\.s?css$': resolve('config/jest/CSSStub.js'),
       '^react-native$': 'react-native-web',
     },
   };
