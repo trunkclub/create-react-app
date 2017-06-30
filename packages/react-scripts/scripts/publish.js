@@ -1,11 +1,13 @@
 // Adpated from https://github.com/trunkclub/tcweb-build/blob/master/src/cli/tasks/publish.es6
 
-var path = require('path');
-var spawn = require('cross-spawn');
+'use strict'
 
-var pkg = require(path.join(process.cwd(), 'package.json'));
-var current = pkg.version;
-var latest = spawn.sync(
+const path = require('path');
+const spawn = require('cross-spawn');
+
+const pkg = require(path.join(process.cwd(), 'package.json'));
+const current = pkg.version;
+const latest = spawn.sync(
   'npm',
   ['view', pkg.name, 'dist-tags.latest']
 ).stdout.toString().replace(/\n/, '');
@@ -14,7 +16,6 @@ console.log();
 console.log('   package = ' + current);
 console.log('  registry = ' + latest);
 console.log();
-
 
 if (current === latest) {
   console.log('Already published on trunkclub private registry.');

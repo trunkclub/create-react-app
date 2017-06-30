@@ -1,15 +1,15 @@
 'use strict';
 
-var path = require('path');
-var spawn = require('cross-spawn');
+const path = require('path');
+const spawn = require('cross-spawn');
 
 // First two args will always be:
 //   - node
 //   - path/to/prettier.js (this file)
-var argsIndex = process.argv[2] === '--' ? 3 : 2;
-var args = process.argv.slice(argsIndex);
+const argsIndex = process.argv[2] === '--' ? 3 : 2;
+const args = process.argv.slice(argsIndex);
 
-var result = spawn.sync(
+const result = spawn.sync(
   path.resolve(__dirname, '../node_modules/.bin/prettier'),
   [
     '--single-quote',

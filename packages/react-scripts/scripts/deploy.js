@@ -1,5 +1,7 @@
 'use strict';
 
+process.env.NODE_ENV = process.env.NODE_ENV || 'production'
+
 const https = require('https');
 require('../config/env');
 
@@ -25,7 +27,7 @@ if (process.env.TC_HONEYBADGER_KEY) {
          , `deploy[repository]=${process.env.CIRCLE_REPOSITORY_URL}`
          , `api_key=${process.env.TC_HONEYBADGER_KEY}`
          ].join('&'),
-           res => {
+           () => {
              console.log('HoneyBadger deployment notification successful.')
              process.exit(0);
            })
