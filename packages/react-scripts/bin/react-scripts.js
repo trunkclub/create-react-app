@@ -10,31 +10,47 @@
 
 'use strict';
 
-var spawn = require('cross-spawn');
-var checkNodeVersion = require('../utils/checkNodeVersion');
-var script = process.argv[2];
-var args = process.argv.slice(3);
+const spawn = require('@trunkclub/react-dev-utils/crossSpawn');
+const checkNodeVersion = require('../utils/checkNodeVersion');
+const script = process.argv[2];
+const args = process.argv.slice(3);
 
 checkNodeVersion(process.cwd());
 
-function run (s) {
-  switch (s) {
+switch (script) {
   case 'build':
   case 'eject':
   case 'start':
-  case 'test':
   case 'build-module':
   case 'lint':
   case 'prettier':
   case 'publish':
   case 'deploy':
-    var result = spawn.sync(
+  case 'test': {
+    const result = spawn.sync(
       'node',
-      [require.resolve('../scripts/' + s)].concat(args),
-      {stdio: 'inherit'}
+      [require.resolve('../scripts/' + script)].concat(args),
+      { stdio: 'inherit' }
     );
+    if (result.signal) {
+      if (result.signal === 'SIGKILL') {
+        console.log(
+          'The build failed because the process exited too early. ' +
+            'This probably means the system ran out of memory or someone called ' +
+            '`kill -9` on the process.'
+        );
+      } else if (result.signal === 'SIGTERM') {
+        console.log(
+          'The build failed because the process exited too early. ' +
+            'Someone might have called `kill` or `killall`, or the system could ' +
+            'be shutting down.'
+        );
+      }
+      process.exit(1);
+    }
     process.exit(result.status);
     break;
+  }
   case 'develop': case 'd':
     console.log('The "' + s + '" task has been renamed to "start".');
     console.log();
@@ -56,8 +72,8 @@ function run (s) {
   default:
     console.log('Unknown script "' + script + '".');
     console.log('Perhaps you need to update @trunkclub/build?');
+    console.log(
+      'See: https://github.com/trunkclub/tcweb-build/blob/master/packages/react-scripts/template/README.md#updating-to-new-releases'
+    );
     break;
-  }
 }
-
-run(script)

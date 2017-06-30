@@ -1,5 +1,7 @@
+'use strict';
+
 const https = require('https');
-require('../utils/loadEnv');
+require('../config/env');
 
 if (process.env.TC_HONEYBADGER_KEY) {
   console.log('Notifying HoneyBadger of a deploy.')

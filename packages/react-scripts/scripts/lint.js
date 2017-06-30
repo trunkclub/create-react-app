@@ -1,4 +1,6 @@
-require('../utils/loadEnv');
+'use strict';
+
+require('../config/env');
 
 var paths = require('../config/paths');
 var CLIEngine = require('eslint').CLIEngine;
@@ -21,4 +23,6 @@ var formatter = eslint.getFormatter();
 CLIEngine.outputFixes(report);
 console.log(formatter(report.results));
 
-if (report.errorCount !== 0) process.exit(1);
+if (report.errorCount !== 0) {
+  process.exit(1);
+}
