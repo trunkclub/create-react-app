@@ -24,6 +24,11 @@ missing the `-loader` suffix then you will need to update them:
 +require(`!!html-loader!assets/svg-icons/${name}.svg`)
 ```
 
+### TypeError: Cannot read property 'request' of undefined
+
+There is likely a loader dependency that is declared at the app-level which is not
+compatible with webpack 2.
+
 ## Runtime Errors
 
 ### Cannot assign to read only property 'exports' of object
@@ -47,5 +52,14 @@ const Spinner = ...
 
 ## Testing Errors
 
+### Failing Snapshots
+
 Jest updated the format of snapshots, so you may have a lot of failing snapshot tests.
 In most cases, it should be safe to just update your snapshots.
+
+### Jest Fails to Run Due to a TypeError for Path
+
+If Jest won't even run and it complains about a expecting a string for path,
+then it's likely due to multiple versions of Jest installed in `node_modules`.
+
+Nuking your `node_modules` folder _should_ fix it.
