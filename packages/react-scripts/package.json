@@ -1,6 +1,6 @@
 {
   "name": "@trunkclub/build",
-  "version": "8.0.0-beta.1",
+  "version": "8.0.0-beta.2",
   "upstream-version": "1.0.7",
   "description": "Configuration and scripts for Create React App. Fork maintained by Trunk Club",
   "repository": "trunkclub/create-react-app",
@@ -39,7 +39,7 @@
     "babel-loader": "7.0.0",
     "babel-plugin-module-resolver": "2.3.0",
     "babel-polyfill": "6.16.0",
-    "babel-preset-trunkclub": "^5.0.0-beta.6",
+    "babel-preset-trunkclub": "^5.0.0-beta.7",
     "babel-runtime": "6.23.0",
     "case-sensitive-paths-webpack-plugin": "1.1.4",
     "chalk": "1.1.3",
