@@ -39,6 +39,7 @@ module.exports = (resolve, rootDir, isEjecting) => {
       '^.+\\.s?css$': resolve('config/jest/cssTransform.js'),
       '^(?!.*\\.(js|jsx|css|json|es6|scss)$)': resolve('config/jest/fileTransform.js'),
     },
+    transformIgnorePatterns: [],
     moduleDirectories: ['src', 'node_modules'],
     moduleFileExtensions: ['js', 'json', 'es6', 'jsx'],
     moduleNameMapper: {
