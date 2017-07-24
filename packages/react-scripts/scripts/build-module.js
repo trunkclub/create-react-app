@@ -8,10 +8,6 @@ var spawn = require('cross-spawn')
 var paths = require('../config/paths')
 const chalk = require('chalk')
 
-function lint() {
-  return spawn.sync('node', [require.resolve('./lint')], { stdio: 'inherit' })
-}
-
 function fancyLog(color, label, fileName, src, dest) {
   console.log(
     color.bgBlack(label),
@@ -93,13 +89,12 @@ if (shouldClean) {
   fs.removeSync(paths.appBuild)
 }
 
-var result = lint()
 fs.walkSync(paths.appSrc).forEach(function(filePath) {
   processFile(path.relative(paths.appSrc, filePath))
 })
 
 var isWatch = args.indexOf('-w') !== -1 || args.indexOf('--watch') !== -1
-if (!isWatch) process.exit(result.status)
+if (!isWatch) process.exit(0)
 
 var watcher = chokidar.watch(['**/*.*'], {
   cwd: paths.appSrc,
@@ -109,7 +104,6 @@ var watcher = chokidar.watch(['**/*.*'], {
 
 watcher.on('all', function(event, filePath) {
   if (event === 'add' || event === 'change') {
-    lint()
     processFile(filePath)
   }
 })
