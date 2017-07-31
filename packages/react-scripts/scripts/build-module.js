@@ -22,10 +22,6 @@ const chalk = require('chalk')
 
 const assetFileRegex = /\.(s?css|svg|json|ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$/
 
-function lint() {
-  return spawn.sync('node', [require.resolve('./lint')], { stdio: 'inherit' })
-}
-
 function fancyLog(color, label, fileName, src, dest) {
   console.log(
     color.bgBlack(label),
@@ -99,14 +95,11 @@ if (shouldClean) {
   fs.removeSync(paths.appBuild)
 }
 
-const result = lint()
 walkSync(paths.appSrc).map(({ path }) => path).forEach(function(filePath) {
   processFile(path.relative(paths.appSrc, filePath))
 })
 
-if (!isWatch) {
-  process.exit(result.status)
-}
+if (!isWatch) process.exit(0)
 
 const watcher = chokidar.watch(['**/*.*'], {
   cwd: paths.appSrc,
@@ -116,7 +109,6 @@ const watcher = chokidar.watch(['**/*.*'], {
 
 watcher.on('all', function(event, filePath) {
   if (event === 'add' || event === 'change') {
-    lint()
     processFile(filePath)
   }
 })
