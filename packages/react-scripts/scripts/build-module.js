@@ -1,12 +1,26 @@
-require('../utils/loadEnv')
+'use strict'
 
-var path = require('path')
-var fs = require('fs-extra')
-var chokidar = require('chokidar')
-var transformFileSync = require('babel-core').transformFileSync
-var spawn = require('cross-spawn')
-var paths = require('../config/paths')
+const args = process.argv.slice(2)
+const isWatch = args.indexOf('-w') !== -1 || args.indexOf('--watch') !== -1
+const shouldClean = args.indexOf('--clean') !== -1
+const outDirIdx =
+  args.indexOf('-d') !== -1 ? args.indexOf('-d') : args.indexOf('--out-dir')
+
+const envFallback = isWatch ? 'development' : 'production'
+process.env.NODE_ENV = process.env.NODE_ENV || envFallback
+
+require('../config/env')
+
+const path = require('path')
+const fs = require('fs-extra')
+const walkSync = require('klaw-sync')
+const chokidar = require('chokidar')
+const transformFileSync = require('babel-core').transformFileSync
+const spawn = require('cross-spawn')
+const paths = require('../config/paths')
 const chalk = require('chalk')
+
+const assetFileRegex = /\.(s?css|svg|json|ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$/
 
 function fancyLog(color, label, fileName, src, dest) {
   console.log(
@@ -64,39 +78,30 @@ function copyAsset(filePath) {
 function processFile(filePath) {
   if (/\.(es6|jsx?)$/.test(filePath)) {
     fs.mkdirpSync(path.parse(path.join(paths.appBuild, filePath)).dir)
-    const outputPath = transformWithBabel(filePath)
-  } else if (
-    /\.(s?css|svg|json|ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$/.test(
-      filePath
-    )
-  ) {
+    return transformWithBabel(filePath)
+  }
+  if (assetFileRegex.test(filePath)) {
     fs.mkdirpSync(path.parse(path.join(paths.appBuild, filePath)).dir)
-    copyAsset(filePath)
+    return copyAsset(filePath)
   }
 }
 
-var args = process.argv.slice(2)
-
-var outDirIdx =
-  args.indexOf('-d') !== -1 ? args.indexOf('-d') : args.indexOf('--out-dir')
 if (outDirIdx !== -1) {
   paths.appBuild = path.resolve(paths.appBuild, '..', args[outDirIdx + 1])
 }
 
 // Clear previous build artifacts before we start
-var shouldClean = args.indexOf('--clean') !== -1
 if (shouldClean) {
   fs.removeSync(paths.appBuild)
 }
 
-fs.walkSync(paths.appSrc).forEach(function(filePath) {
+walkSync(paths.appSrc).map(({ path }) => path).forEach(function(filePath) {
   processFile(path.relative(paths.appSrc, filePath))
 })
 
-var isWatch = args.indexOf('-w') !== -1 || args.indexOf('--watch') !== -1
 if (!isWatch) process.exit(0)
 
-var watcher = chokidar.watch(['**/*.*'], {
+const watcher = chokidar.watch(['**/*.*'], {
   cwd: paths.appSrc,
   persistent: true,
   ignoreInitial: true,

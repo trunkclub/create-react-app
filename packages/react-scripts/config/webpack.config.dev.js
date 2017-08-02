@@ -10,21 +10,24 @@
 // @remove-on-eject-end
 'use strict';
 
-var autoprefixer = require('autoprefixer');
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-var InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin');
-var WatchMissingNodeModulesPlugin = require('@trunkclub/react-dev-utils/WatchMissingNodeModulesPlugin');
-var ProgressBarPlugin = require('progress-bar-webpack-plugin');
-var TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
-var getClientEnvironment = require('./env');
-var path = require('path');
-var paths = require('./paths');
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const InterpolateHtmlPlugin = require('@trunkclub/react-dev-utils/InterpolateHtmlPlugin');
+const WatchMissingNodeModulesPlugin = require('@trunkclub/react-dev-utils/WatchMissingNodeModulesPlugin');
+const eslintFormatter = require('@trunkclub/react-dev-utils/eslintFormatter');
+const ModuleScopePlugin = require('@trunkclub/react-dev-utils/ModuleScopePlugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
+const getClientEnvironment = require('./env');
+const paths = require('./paths');
 
-var publicUrl = 'http://localhost:' + (process.env.PORT || '3000');
-var publicPath = publicUrl + '/';
-var env = getClientEnvironment(publicUrl);
+const publicUrl = 'http://localhost:' + (process.env.PORT || '3000');
+const publicPath = publicUrl + '/';
+const env = getClientEnvironment(publicUrl);
+
+const getCSSLoaders = require('./webpack/cssLoaders');
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -52,8 +55,10 @@ module.exports = {
     require.resolve('@trunkclub/react-dev-utils/webpackHotDevClient'),
     // We ship a few polyfills by default:
     require.resolve('babel-polyfill'),
+    // Errors should be considered fatal in development
+    require.resolve('react-error-overlay'),
     // Finally, this is your app's code:
-    paths.appIndexJs
+    paths.appIndexJs,
     // We include the app code last so that if there is a runtime error during
     // initialization, it doesn't blow up the WebpackDevServer client, and
     // changing JS code would still trigger a refresh.
@@ -67,68 +72,104 @@ module.exports = {
     // served by WebpackDevServer in development. This is the JS bundle
     // containing code from all our entry points, and the Webpack runtime.
     filename: 'static/js/bundle.js',
+    // There are also additional JS chunk files if you use code splitting.
+    chunkFilename: 'static/js/[name].chunk.js',
     // This is the URL that app is served from. We use "/" in development.
-    publicPath: publicPath
+    publicPath: publicPath,
+    // Point sourcemap entries to original disk location
+    devtoolModuleFilenameTemplate: info =>
+      path.resolve(info.absoluteResourcePath),
   },
   resolve: {
-    root: paths.appSrc,
     // This allows you to set a fallback for where Webpack should look for modules.
-    // We read `NODE_PATH` environment variable in `paths.js` and pass paths here.
-    // We use `fallback` instead of `root` because we want `node_modules` to "win"
-    // if there any conflicts. This matches Node resolution mechanism.
+    // We placed these paths second because we want `node_modules` to "win"
+    // if there are any conflicts. This matches Node resolution mechanism.
     // https://github.com/facebookincubator/create-react-app/issues/253
-    // We also fallback to the app's node_modules to support hoisted modules in a
-    // linked package workflow.
-    fallback: [paths.appNodeModules].concat(paths.nodePaths),
+    modules: [paths.appSrc, 'node_modules', paths.appNodeModules].concat(
+      // It is guaranteed to exist because we tweak it in `env.js`
+      process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
+    ),
     // These are the reasonable defaults supported by the Node ecosystem.
     // We also include JSX as a common component filename extension to support
     // some tools, although we do not recommend using it, see:
     // https://github.com/facebookincubator/create-react-app/issues/290
-    extensions: ['.js', '.json', '.jsx', '.es6', '.coffee', '.cjsx', ''],
+    extensions: ['.js', '.json', '.jsx', '.es6', '.coffee', '.cjsx'],
     alias: {
       // This will prevent the multiple React instances issue (invariant). This mostly
       // occurs when locally linking another npm package that requires React.
       react: path.resolve(paths.appNodeModules, 'react'),
+      'react-dom': path.resolve(paths.appNodeModules, 'react-dom'),
+      // @remove-on-eject-begin
+      // Resolve Babel runtime relative to react-scripts.
+      // It usually still works on npm 3 without this but it would be
+      // unfortunate to rely on, as react-scripts could be symlinked,
+      // and thus babel-runtime might not be resolvable from the source.
+      'babel-runtime': path.dirname(
+        require.resolve('babel-runtime/package.json')
+      ),
+      // @remove-on-eject-end
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
-      'react-native': 'react-native-web'
-    }
+      'react-native': 'react-native-web',
+    },
+    plugins: [
+      // Prevents users from importing files from outside of src/ (or node_modules/).
+      // This often causes confusion because we only process files within src/ with babel.
+      // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
+      // please link the files into your node_modules/ and let module-resolution kick in.
+      // Make sure your source files are compiled, as they will not be processed in any way.
+      new ModuleScopePlugin(paths.appSrc),
+    ],
   },
   resolveLoader: {
     // @remove-on-eject-begin
     // Resolve loaders (webpack plugins for CSS, images, transpilation) from the
     // directory of `react-scripts` itself rather than the project directory.
-    root: paths.ownNodeModules,
+    modules: [paths.ownNodeModules, paths.appNodeModules],
     // @remove-on-eject-end
-    // Fallback to any hoisted modules when dealing with linked libraries
-    fallback: paths.appNodeModules
   },
   module: {
     noParse: [/\.elm$/],
-    preLoaders: [
+    strictExportPresence: true,
+    rules: [
+      // TODO: Disable require.ensure as it's not a standard language feature.
+      // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
+      // { parser: { requireEnsure: false } },
+
+      // First, run the linter.
+      // It's important to do this before Babel processes the JS.
       {
-        loader: 'source-map-loader',
         test: /\.(jsx?|es6)$/,
-        include: function (abs) {
-          const rel = path.relative(paths.appSrc, abs)
-          return /@trunkclub/.test(rel)
-        }
-      },
-      {
-        loader: 'eslint-loader',
-        test: /\.(jsx?|es6)$/,
+        enforce: 'pre',
+        use: [
+          {
+            loader: require.resolve('source-map-loader'),
+          },
+          {
+            options: {
+              formatter: eslintFormatter,
+              // @remove-on-eject-begin
+              baseConfig: {
+                extends: [require.resolve('@trunkclub/eslint-config')],
+              },
+              ignore: false,
+              useEslintrc: false,
+              // @remove-on-eject-end
+            },
+            loader: require.resolve('eslint-loader'),
+          },
+        ],
         include: paths.appSrc,
-      }
-    ],
-    loaders: [
+      },
       // ** ADDING/UPDATING LOADERS **
-      // The "url" loader handles all assets unless explicitly excluded.
+      // The "file" loader handles all assets unless explicitly excluded.
       // The `exclude` list *must* be updated with every change to loader extensions.
       // When adding a new loader, you must add its `test`
-      // as a new entry in the `exclude` list for "url" loader.
+      // as a new entry in the `exclude` list for "file" loader.
 
-      // "url" loader embeds assets smaller than specified size as data URLs to avoid requests.
-      // Otherwise, it acts like the "file" loader.
+      // "file" loader makes sure those assets get served by WebpackDevServer.
+      // When you `import` an asset, you get its (virtual) filename.
+      // In production, they would get copied to the `build` folder.
       {
         exclude: [
           /\.html$/,
@@ -138,20 +179,34 @@ module.exports = {
           /\.coffee$/,
           /\.cjsx$/,
           /\.elm$/,
-          /\.svg$/
+          /\.svg$/,
+          /\.bmp$/,
+          /\.gif$/,
+          /\.jpe?g$/,
+          /\.png$/,
         ],
-        loader: 'url-loader',
-        query: {
+        loader: require.resolve('file-loader'),
+        options: {
+          name: 'static/media/[name].[hash:8].[ext]',
+        },
+      },
+      // "url" loader works like "file" loader except that it embeds assets
+      // smaller than specified limit in bytes as data URLs to avoid requests.
+      // A missing `test` is equivalent to a match.
+      {
+        test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+        loader: require.resolve('url-loader'),
+        options: {
           limit: 10000,
-          name: 'static/media/[name].[hash:8].[ext]'
-        }
+          name: 'static/media/[name].[hash:8].[ext]',
+        },
       },
       // Process JS with Babel.
       {
         test: /\.(js|jsx|es6)$/,
         include: paths.appSrc,
-        loader: 'babel-loader',
-        query: {
+        loader: require.resolve('babel-loader'),
+        options: {
           // @remove-on-eject-begin
           babelrc: false,
           presets: [require.resolve('babel-preset-trunkclub')],
@@ -159,18 +214,21 @@ module.exports = {
           // This is a feature of `babel-loader` for webpack (not Babel itself).
           // It enables caching results in ./node_modules/.cache/babel-loader/
           // directory for faster rebuilds.
-          cacheDirectory: true
-        }
+          cacheDirectory: true,
+        },
       },
       {
         test: /\.elm/,
         include: paths.appSrc,
-        loader: 'elm-webpack-loader'
+        loader: require.resolve('elm-webpack-loader'),
       },
       {
         test: /\.(coffee|cjsx)$/,
         include: paths.appSrc,
-        loaders: ['coffee-loader', 'cjsx-loader']
+        loaders: [
+          require.resolve('coffee-loader'),
+          require.resolve('cjsx-loader'),
+        ],
       },
       // "postcss" loader applies autoprefixer to our CSS.
       // "css" loader resolves paths in CSS and adds assets as dependencies.
@@ -181,52 +239,33 @@ module.exports = {
       // then we will process it as a CSS Module (https://github.com/css-modules/css-modules).
       {
         test: /\.module\.s?css$/,
-        loader: 'style-loader!css-loader?importLoaders=1&modules&localIdentName=[path][name]__[local]--[hash:base64:8]&sourceMap!postcss-loader!sass-loader?sourceMap'
+        use: [require.resolve('style-loader')].concat(getCSSLoaders({
+          modules: true,
+          localidentname: '[path][name]__[local]--[hash:base64:8]',
+        })),
       },
       {
-        /* test: /(?<!\.module)\.s?css$/,*/
         test: /\.s?css$/,
         exclude: /\.module\.s?css$/,
-        loader: 'style-loader!css-loader?importLoaders=1&sourceMap!postcss-loader!sass-loader?sourceMap'
+        use: [require.resolve('style-loader')].concat(getCSSLoaders()),
       },
       // JSON is not enabled by default in Webpack but both Node and Browserify
       // allow it implicitly so we also enable it.
       {
         test: /\.json$/,
-        loader: 'json-loader'
+        loader: require.resolve('json-loader'),
       },
       // "file" loader for svg
       {
         test: /\.svg$/,
-        loader: 'file-loader',
+        loader: require.resolve('file-loader'),
         query: {
-          name: 'static/media/[name].[hash:8].[ext]'
-        }
-      }
+          name: 'static/media/[name].[hash:8].[ext]',
+        },
+      },
       // ** STOP ** Are you adding a new loader?
-      // Remember to add the new extension(s) to the "url" loader exclusion list.
-    ]
-  },
-  // @remove-on-eject-begin
-  // Point ESLint to our predefined config.
-  eslint: {
-    configFile: path.join(__dirname, '../eslintrc'),
-    useEslintrc: false,
-    emitWarning: true,
-  },
-  // @remove-on-eject-end
-  // We use PostCSS for autoprefixing only.
-  postcss: function() {
-    return [
-      autoprefixer({
-        browsers: [
-          '>1%',
-          'last 4 versions',
-          'Firefox ESR',
-          'not ie < 9', // React doesn't support IE8 anyway
-        ]
-      }),
-    ];
+      // Remember to add the new extension(s) to the "file" loader exclusion list.
+    ],
   },
   plugins: [
     new ProgressBarPlugin({
@@ -262,13 +301,23 @@ module.exports = {
     // to restart the development server for Webpack to discover it. This plugin
     // makes the discovery automatic so you don't have to restart.
     // See https://github.com/facebookincubator/create-react-app/issues/186
-    new WatchMissingNodeModulesPlugin(paths.appNodeModules)
+    new WatchMissingNodeModulesPlugin(paths.appNodeModules),
+    // Moment.js is an extremely popular library that bundles large locale files
+    // by default due to how Webpack interprets its code. This is a practical
+    // solution that requires the user to opt into importing specific locales.
+    // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
   node: {
     fs: 'empty',
     net: 'empty',
-    tls: 'empty'
-  }
+    tls: 'empty',
+  },
+  // Turn off performance hints during development because we don't do any
+  // splitting or minification in interest of speed. These warnings become
+  // cumbersome.
+  performance: {
+    hints: false,
+  },
 };
