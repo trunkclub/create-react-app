@@ -16,7 +16,6 @@ const fs = require('fs-extra')
 const walkSync = require('klaw-sync')
 const chokidar = require('chokidar')
 const transformFileSync = require('babel-core').transformFileSync
-const spawn = require('cross-spawn')
 const paths = require('../config/paths')
 const chalk = require('chalk')
 
