@@ -26,16 +26,18 @@ if (!NODE_ENV) {
   );
 }
 
+const TC_ENV = process.env.TC_ENV
+
 // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 var dotenvFiles = [
-  `${paths.appPath}/${NODE_ENV}.env.overrides`,
-  `${paths.appPath}/${NODE_ENV}.env`,
-  `${paths.dotenv}.${NODE_ENV}.local`,
-  `${paths.dotenv}.${NODE_ENV}`,
+  `${paths.appPath}/${TC_ENV}.env.overrides`,
+  `${paths.appPath}/${TC_ENV}.env`,
+  `${paths.dotenv}.${TC_ENV}.local`,
+  `${paths.dotenv}.${TC_ENV}`,
   // Don't include `.env.local` for `test` environment
   // since normally you expect tests to produce the same
   // results for everyone
-  NODE_ENV !== 'test' && `${paths.dotenv}.local`,
+  TC_ENV !== 'test' && `${paths.dotenv}.local`,
   paths.dotenv,
 ].filter(Boolean);
 
