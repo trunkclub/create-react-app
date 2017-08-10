@@ -7,7 +7,7 @@ module.exports = function getCSSLoaders(cssLoaderOpts) {
     {
       loader: require.resolve('css-loader'),
       options: Object.assign({}, {
-        importLoaders: 1,
+        importLoaders: 2,
         sourceMap: true,
       }, (cssLoaderOpts || {})),
     },
