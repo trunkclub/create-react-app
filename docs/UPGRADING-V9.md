@@ -2,6 +2,18 @@
 
 *This doc assumes you have already upgraded to v8.*
 
+**TOC**
+
+- [Build Errors](#build-errors)
+  - [Module not found](#module-not-found)
+  - [TypeError: Cannot read property 'request' of undefined](#typeerror-cannot-read-property-request-of-undefined)
+  - [Module build failed: Unclosed bracket](#module-build-failed-unclosed-bracket)
+- [Runtime Errors](#runtime-errors)
+  - [Cannot assign to read only property 'exports' of object](#cannot-assign-to-read-only-property-exports-of-object)
+- [Testing Errors](#testing-errors)
+  - [Failing Snapshots](#failing-snapshots)
+  - [Jest Fails to Run Due to a TypeError for Path](#jest-fails-to-run-due-to-a-typeerror-for-path)
+
 ## Build Errors
 
 ### Module not found
@@ -31,6 +43,61 @@ and reinstalling with `yarn` or `npm install`.
 
 If that doesn't work, there might be a loader dependency that is declared at the app-level
 which is not compatible with webpack 2.
+
+### Module build failed: Unclosed bracket
+
+You may encounter a Sass error similar to the following:
+
+```
+Failed to compile.
+
+./src/scss/main.scss
+Module build failed: Unclosed bracket (105:2)
+
+  103 |           transform: translate(-50%, -50%); }
+  104 |
+> 105 | .u-zIndex-highest {
+      |  ^
+  106 |   z-index: 99999 !important; }
+  107 |
+  108 | .u-colorCopper {
+```
+
+In this instance, one of the CSS compilers is struggling with `calc()` statements that are calculating static values, such as:
+
+```scss
+.classname {
+  height: calc(100% / 2);
+  width: calc(100% / 2 - 10px);
+}
+```
+
+To fix it, update your `calc()` statements to use either:
+
+- Actual values
+- Sass interpolation
+
+The actual value is fine if the math is simple:
+
+```diff
+ .classname {
+-  height: calc(100% / 2);
++  height: 50%;
+-  width: calc(100% / 2 - 10px);
++  width: calc(50% - 10px);
+ }
+```
+
+If you want to retain *how* the value was computed, you can use Sass interpolation:
+
+```diff
+ .classname {
+-  height: calc(100% / 2);
++  height: #{(100% / 2)};
+-  width: calc(100% / 2 - 10px);
++  width: calc(#{(100% / 2)} - 10px);
+ }
+```
 
 ## Runtime Errors
 
