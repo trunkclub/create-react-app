@@ -154,7 +154,6 @@ module.exports = {
               },
               ignore: false,
               useEslintrc: false,
-              emitWarning: true,
               // @remove-on-eject-end
             },
             loader: require.resolve('eslint-loader'),
