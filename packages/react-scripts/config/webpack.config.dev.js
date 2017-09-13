@@ -150,7 +150,7 @@ module.exports = {
               formatter: eslintFormatter,
               // @remove-on-eject-begin
               baseConfig: {
-                extends: [require.resolve('@trunkclub/eslint-config')],
+                extends: [require.resolve('eslint-config-react-app')],
               },
               ignore: false,
               useEslintrc: false,

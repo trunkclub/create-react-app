@@ -4,7 +4,7 @@ require('../config/env');
 
 var paths = require('../config/paths');
 var CLIEngine = require('eslint').CLIEngine;
-var config = require('@trunkclub/eslint-config');
+var config = require('eslint-config-react-app')
 
 config.fix = true;
 config.extensions = ['.js', '.jsx', '.es6'];
