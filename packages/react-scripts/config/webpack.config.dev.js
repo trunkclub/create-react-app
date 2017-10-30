@@ -241,7 +241,7 @@ module.exports = {
         test: /\.module\.s?css$/,
         use: [require.resolve('style-loader')].concat(getCSSLoaders({
           modules: true,
-          localidentname: '[path][name]__[local]--[hash:base64:8]',
+          localIdentName: '[path][name]__[local]--[hash:base64:8]',
         })),
       },
       {
