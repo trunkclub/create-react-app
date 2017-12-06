@@ -1,6 +1,8 @@
 'use strict'
 
 const path = require('path')
+const git = require('git-rev-sync')
+const commit = git.long()
 
 function getVersions(packagePath, modulesPath) {
   try {
@@ -21,7 +23,12 @@ function getVersions(packagePath, modulesPath) {
           return acc
         }
       }, {})
-    return Object.assign({}, { [pkg.name]: pkg.version }, versions)
+    return {
+      name: pkg.name,
+      version: pkg.version,
+      commit,
+      dependencies: versions,
+    }
   } catch (e) {
     return { error: `${e.name}: ${e.message}` }
   }
