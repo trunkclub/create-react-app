@@ -19,7 +19,7 @@ const WatchMissingNodeModulesPlugin = require('@trunkclub/react-dev-utils/WatchM
 const eslintFormatter = require('@trunkclub/react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('@trunkclub/react-dev-utils/ModuleScopePlugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
+const TrunkClubVersionsPlugin = require('../utils/trunkclubVersionsPlugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
 

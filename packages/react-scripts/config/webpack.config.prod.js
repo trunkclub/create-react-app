@@ -23,7 +23,7 @@ const paths = require('./paths');
 const getClientEnvironment = require('./env');
 
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const TrunkClubVersionsPlugin = require('../utils/trunkclub-versions-plugin');
+const TrunkClubVersionsPlugin = require('../utils/trunkclubVersionsPlugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const getCSSLoaders = require('./webpack/cssLoaders');
 
