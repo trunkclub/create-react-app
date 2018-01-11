@@ -37,14 +37,18 @@ module.exports = (resolve, rootDir, isEjecting) => {
         ? '<rootDir>/node_modules/babel-jest'
         : resolve('config/jest/babelTransform.js'),
       '^.+\\.s?css$': resolve('config/jest/cssTransform.js'),
-      '^(?!.*\\.(js|jsx|css|json|es6|scss)$)': resolve('config/jest/fileTransform.js'),
+      '^(?!.*\\.(js|jsx|css|json|es6|scss)$)': resolve(
+        'config/jest/fileTransform.js'
+      ),
     },
     transformIgnorePatterns: [],
     moduleDirectories: ['src', 'node_modules'],
     moduleFileExtensions: ['js', 'json', 'es6', 'jsx'],
     moduleNameMapper: {
-      '^.+\\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': resolve('config/jest/FileStub.js'),
-      '^.+\\.s?css$': resolve('config/jest/CSSStub.js'),
+      '^.+\\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': resolve(
+        'config/jest/FileStub.js'
+      ),
+      '^.+\\.s?css$': 'identity-obj-proxy',
       '^react-native$': 'react-native-web',
     },
   };
