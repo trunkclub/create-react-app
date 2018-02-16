@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 /**
  * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 'use strict';
 
 const spawn = require('@trunkclub/react-dev-utils/crossSpawn');
-const checkNodeVersion = require('../utils/checkNodeVersion');
-const script = process.argv[2];
-const args = process.argv.slice(3);
+const args = process.argv.slice(2);
 
-checkNodeVersion(process.cwd());
+const scriptIndex = args.findIndex(
+  x => x === 'build' || x === 'eject' || x === 'start' || x === 'test'
+);
+const script = scriptIndex === -1 ? args[0] : args[scriptIndex];
+const nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : [];
 
 switch (script) {
   case 'build':
@@ -29,7 +29,9 @@ switch (script) {
   case 'test': {
     const result = spawn.sync(
       'node',
-      [require.resolve('../scripts/' + script)].concat(args),
+      nodeArgs
+        .concat(require.resolve('../scripts/' + script))
+        .concat(args.slice(scriptIndex + 1)),
       { stdio: 'inherit' }
     );
     if (result.signal) {
@@ -51,21 +53,28 @@ switch (script) {
     process.exit(result.status);
     break;
   }
-  case 'develop': case 'd':
+  case 'develop':
+  case 'd':
     console.log('The "' + s + '" task has been renamed to "start".');
     console.log();
     run('start');
     break;
   case 'l':
     run('lint');
-    break
+    break;
   case 'p':
     run('publish');
     break;
-  case 'package-status': case 'ps':
-    console.log('The "' + s +'" task is no longer separate from the "build", "start", and "test" tasks.')
+  case 'package-status':
+  case 'ps':
+    console.log(
+      'The "' +
+        s +
+        '" task is no longer separate from the "build", "start", and "test" tasks.'
+    );
     break;
-  case 'flow': case 'f':
+  case 'flow':
+  case 'f':
     console.log('Flow is now part of the "lint" task. Running the linter...');
     run('lint');
     break;
