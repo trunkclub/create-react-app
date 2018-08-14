@@ -1,0 +1,49 @@
+defaults: &defaults
+  docker:
+    - image: circleci/node:6.14.3
+  working_directory: /tmp/code
+
+attached_workspace: &attached_workspace
+  at: /tmp
+
+version: 2
+jobs:
+  release:
+    <<: *defaults
+    steps:
+      - run: ../../tasks/release.sh
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: yarn
+      - persist_to_workspace:
+          root: /tmp
+          paths: code
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace: *attached_workspace
+      - run: yarn test
+  publish:
+    <<: *defaults
+    steps:
+      - attach_workspace: *attached_workspace
+      - run: yarn publish
+
+workflows:
+  version: 2
+  tcweb-build:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - release:
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only:
+                - master
