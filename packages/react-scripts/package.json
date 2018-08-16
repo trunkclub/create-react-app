@@ -2,7 +2,7 @@
   "name": "@trunkclub/build",
   "version": "10.2.0",
   "upstream-version": "1.0.7",
-  "description": "Configuration and scripts for Create React App. Fork maintained by Trunk Club",
+  "description": "Configuration and scripts for Create React App. Fork maintained by Trunk Club Tech Team",
   "repository": "trunkclub/create-react-app",
   "license": "BSD-3-Clause",
   "scripts": {
