@@ -1,6 +1,6 @@
 {
   "name": "@trunkclub/build",
-  "version": "11.0.0-alpha.4",
+  "version": "11.0.0-alpha.5",
   "description": "Configuration and scripts for Create React App. Fork maintained by Trunk Club",
   "repository": "facebook/create-react-app",
   "license": "MIT",
