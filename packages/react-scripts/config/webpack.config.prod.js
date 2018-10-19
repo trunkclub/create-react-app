@@ -29,6 +29,9 @@ const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 // @remove-on-eject-end
 
+/** TC CUSTOM */
+const TrunkClubVersionsPlugin = require('../utils/trunkclubVersionsPlugin');
+
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
 const publicPath = paths.servedPath;
@@ -476,7 +479,8 @@ module.exports = {
     }),
     // Inlines the webpack runtime script. This script is too small to warrant
     // a network request.
-    shouldInlineRuntimeChunk && new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
+    shouldInlineRuntimeChunk &&
+      new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
@@ -524,6 +528,13 @@ module.exports = {
         // public/ and not a SPA route
         new RegExp('/[^/]+\\.[^/]+$'),
       ],
+    }),
+    /** TC CUSTOM */
+    // This will add a file to the build named 'tcversions.json' to assist
+    // with debugging apps that are in staging and production.
+    new TrunkClubVersionsPlugin({
+      packagePath: paths.appPackageJson,
+      modulesPath: paths.appNodeModules,
     }),
   ].filter(Boolean),
   // Some libraries import Node modules but don't use them in the browser.

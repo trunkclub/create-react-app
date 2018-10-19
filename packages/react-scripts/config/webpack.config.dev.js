@@ -25,6 +25,9 @@ const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 // @remove-on-eject-end
 
+/** TC CUSTOM */
+const TrunkClubVersionsPlugin = require('../utils/trunkclubVersionsPlugin');
+
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
 const publicPath = '/';
@@ -405,6 +408,13 @@ module.exports = {
     new ManifestPlugin({
       fileName: 'asset-manifest.json',
       publicPath: publicPath,
+    }),
+    /** TC CUSTOM */
+    // This will add a file to the build named 'tcversions.json' to assist
+    // with debugging apps that are in staging and production.
+    new TrunkClubVersionsPlugin({
+      packagePath: paths.appPackageJson,
+      modulesPath: paths.appNodeModules,
     }),
   ],
 

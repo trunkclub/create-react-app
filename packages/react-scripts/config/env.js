@@ -8,6 +8,9 @@
 // @remove-on-eject-end
 'use strict';
 
+/** TC CUSTOM */
+require('./env/getTCEnv');
+
 const fs = require('fs');
 const path = require('path');
 const paths = require('./paths');
@@ -22,10 +25,15 @@ if (!NODE_ENV) {
   );
 }
 
+/** TC CUSTOM */
+const TC_ENV = process.env.TC_ENV;
+
 // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 var dotenvFiles = [
-  `${paths.dotenv}.${NODE_ENV}.local`,
-  `${paths.dotenv}.${NODE_ENV}`,
+  `${paths.appPath}/${TC_ENV}.env.overrides`,
+  `${paths.appPath}/${TC_ENV}.env`,
+  `${paths.dotenv}.${TC_ENV}.local`,
+  `${paths.dotenv}.${TC_ENV}`,
   // Don't include `.env.local` for `test` environment
   // since normally you expect tests to produce the same
   // results for everyone
@@ -64,9 +72,10 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
   .map(folder => path.resolve(appDirectory, folder))
   .join(path.delimiter);
 
-// Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
+/** TC CUSTOM */
+// Grab NODE_ENV and TC_* environment variables and prepare them to be
 // injected into the application via DefinePlugin in Webpack configuration.
-const REACT_APP = /^REACT_APP_/i;
+const REACT_APP = /^(TC_|PORT)/i;
 
 function getClientEnvironment(publicUrl) {
   const raw = Object.keys(process.env)
