@@ -27,6 +27,7 @@ const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 
 /** TC CUSTOM */
 const TrunkClubVersionsPlugin = require('../utils/trunkclubVersionsPlugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -416,6 +417,9 @@ module.exports = {
       packagePath: paths.appPackageJson,
       modulesPath: paths.appNodeModules,
     }),
+    /** TC CUSTOM */
+    // This will show build progress in a nice, visual progress bar
+    new ProgressBarPlugin(),
   ],
 
   // Some libraries import Node modules but don't use them in the browser.
