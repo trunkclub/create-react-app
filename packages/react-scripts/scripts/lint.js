@@ -1,5 +1,8 @@
 'use strict';
 
+process.env.BABEL_ENV = 'development';
+process.env.NODE_ENV = 'development';
+
 require('../config/env');
 
 var paths = require('../config/paths');
@@ -7,7 +10,7 @@ var CLIEngine = require('eslint').CLIEngine;
 var config = require('eslint-config-react-app');
 
 config.fix = true;
-config.extensions = ['.js', '.jsx', '.es6'];
+config.extensions = ['.js', '.jsx'];
 
 // CLIEngine env config differs from .eslintrc
 // http://eslint.org/docs/developer-guide/nodejs-api#cliengine
