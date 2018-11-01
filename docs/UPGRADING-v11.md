@@ -77,3 +77,8 @@ _This doc assumes you have already upgraded to v10._
 
 - We are now using jest v23, so any weird workarounds/hacks in place can probably be fixed
 - `jsdom` is now the default jest environment, so you no longer have to add `--env=jsdom` to your test command
+
+### TypeScript
+
+- TypeScript support is now included
+- Consider using this as an alternative to flow
