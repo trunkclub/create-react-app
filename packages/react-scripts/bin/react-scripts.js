@@ -24,6 +24,15 @@ const scriptIndex = args.findIndex(
 const script = scriptIndex === -1 ? args[0] : args[scriptIndex];
 const nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : [];
 
+/**
+ * TC CUSTOM
+ *
+ * build-module, lint, and publish are scripts mainly used in the monorepo
+ * as convenience functions for each package.  I think they're super useful
+ * and should continue to live, but can definitely be put in their own package
+ * and don't need to be maintained in this fork.
+ */
+
 switch (script) {
   case 'build-module': /** TC CUSTOM */
   case 'lint': /** TC CUSTOM */

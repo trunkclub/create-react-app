@@ -8,7 +8,9 @@
 // @remove-on-eject-end
 'use strict';
 
-/** TC CUSTOM */
+/** TC CUSTOM
+ * See note in config/env.js, applies to this
+ */
 process.env.TC_ENV = process.env.NODE_ENV || 'production';
 
 // Do this as the first thing so that any code reading it knows the right env.

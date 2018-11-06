@@ -29,9 +29,15 @@ const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 // @remove-on-eject-end
 
-/** TC CUSTOM */
+/**
+ * TC CUSTOM
+ *
+ * This is mainly used for apps that need to know when
+ * a new version is released to prompt users to reload, etc.
+ * We can definitely produce a custom script to do this that can live
+ * outside the fork
+ */
 const TrunkClubVersionsPlugin = require('../utils/trunkclubVersionsPlugin');
-const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -455,9 +461,6 @@ module.exports = {
       packagePath: paths.appPackageJson,
       modulesPath: paths.appNodeModules,
     }),
-    /** TC CUSTOM */
-    // This will show build progress in a nice, visual progress bar
-    new ProgressBarPlugin(),
   ].filter(Boolean),
 
   // Some libraries import Node modules but don't use them in the browser.

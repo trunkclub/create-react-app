@@ -8,7 +8,18 @@
 // @remove-on-eject-end
 'use strict';
 
-/** TC CUSTOM */
+/**
+ * TC CUSTOM
+ *
+ * All of the custom logic in this file is around
+ * reading our .env files (production.env, staging.env etc.)
+ * and injecting TC_ prefixed env variables into the webpack build.
+ * Base react-scripts looks for all env files with different names and
+ * variables prefixed with REACT_APP_, so this was made to fit our
+ * existing processes.  I don't believe this needs to be in the fork and
+ * think we should produce a script that can convert our current ENV system
+ * to one that matches react-scripts before the webpack process begins
+ */
 require('./env/getTCEnv');
 
 const fs = require('fs');
