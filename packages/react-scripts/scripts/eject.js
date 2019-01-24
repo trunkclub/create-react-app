@@ -1,11 +1,9 @@
 // @remove-file-on-eject
 /**
  * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 'use strict';
 
@@ -22,8 +20,9 @@ const execSync = require('child_process').execSync;
 const chalk = require('chalk');
 const paths = require('../config/paths');
 const createJestConfig = require('./utils/createJestConfig');
-const inquirer = require('@trunkclub/react-dev-utils/inquirer');
-const spawnSync = require('@trunkclub/react-dev-utils/crossSpawn').sync;
+const inquirer = require('react-dev-utils/inquirer');
+const spawnSync = require('react-dev-utils/crossSpawn').sync;
+const os = require('os');
 
 const green = chalk.green;
 const cyan = chalk.cyan;
@@ -38,6 +37,14 @@ function getGitStatus() {
     return '';
   }
 }
+
+console.log(
+  chalk.cyan.bold(
+    'NOTE: Create React App 2 supports TypeScript, Sass, CSS Modules and more without ejecting: ' +
+      'https://reactjs.org/blog/2018/10/01/create-react-app-v2.html'
+  )
+);
+console.log();
 
 inquirer
   .prompt({
@@ -56,11 +63,17 @@ inquirer
     if (gitStatus) {
       console.error(
         chalk.red(
-          `This git repository has untracked files or uncommitted changes:\n\n` +
-            gitStatus.split('\n').map(line => '  ' + line) +
-            '\n\n' +
+          'This git repository has untracked files or uncommitted changes:'
+        ) +
+          '\n\n' +
+          gitStatus
+            .split('\n')
+            .map(line => line.match(/ .*/g)[0].trim())
+            .join('\n') +
+          '\n\n' +
+          chalk.red(
             'Remove untracked files, stash or commit any changes, and try again.'
-        )
+          )
       );
       process.exit(1);
     }
@@ -85,19 +98,16 @@ inquirer
     const folders = ['config', 'config/jest', 'scripts'];
 
     // Make shallow array of files paths
-    const files = folders.reduce(
-      (files, folder) => {
-        return files.concat(
-          fs
-            .readdirSync(path.join(ownPath, folder))
-            // set full path
-            .map(file => path.join(ownPath, folder, file))
-            // omit dirs from file list
-            .filter(file => fs.lstatSync(file).isFile())
-        );
-      },
-      []
-    );
+    const files = folders.reduce((files, folder) => {
+      return files.concat(
+        fs
+          .readdirSync(path.join(ownPath, folder))
+          // set full path
+          .map(file => path.join(ownPath, folder, file))
+          // omit dirs from file list
+          .filter(file => fs.lstatSync(file).isFile())
+      );
+    }, []);
 
     // Ensure that the app folder is clean and we won't override any files
     folders.forEach(verifyAbsent);
@@ -124,18 +134,19 @@ inquirer
       if (content.match(/\/\/ @remove-file-on-eject/)) {
         return;
       }
-      content = content
-        // Remove dead code from .js files on eject
-        .replace(
-          /\/\/ @remove-on-eject-begin([\s\S]*?)\/\/ @remove-on-eject-end/mg,
-          ''
-        )
-        // Remove dead code from .applescript files on eject
-        .replace(
-          /-- @remove-on-eject-begin([\s\S]*?)-- @remove-on-eject-end/mg,
-          ''
-        )
-        .trim() + '\n';
+      content =
+        content
+          // Remove dead code from .js files on eject
+          .replace(
+            /\/\/ @remove-on-eject-begin([\s\S]*?)\/\/ @remove-on-eject-end/gm,
+            ''
+          )
+          // Remove dead code from .applescript files on eject
+          .replace(
+            /-- @remove-on-eject-begin([\s\S]*?)-- @remove-on-eject-end/gm,
+            ''
+          )
+          .trim() + '\n';
       console.log(`  Adding ${cyan(file.replace(ownPath, ''))} to the project`);
       fs.writeFileSync(file.replace(ownPath, appPath), content);
     });
@@ -146,35 +157,52 @@ inquirer
 
     console.log(cyan('Updating the dependencies'));
     const ownPackageName = ownPackage.name;
-    if (appPackage.devDependencies[ownPackageName]) {
-      console.log(`  Removing ${cyan(ownPackageName)} from devDependencies`);
-      delete appPackage.devDependencies[ownPackageName];
+    if (appPackage.devDependencies) {
+      // We used to put react-scripts in devDependencies
+      if (appPackage.devDependencies[ownPackageName]) {
+        console.log(`  Removing ${cyan(ownPackageName)} from devDependencies`);
+        delete appPackage.devDependencies[ownPackageName];
+      }
     }
+    appPackage.dependencies = appPackage.dependencies || {};
     if (appPackage.dependencies[ownPackageName]) {
       console.log(`  Removing ${cyan(ownPackageName)} from dependencies`);
       delete appPackage.dependencies[ownPackageName];
     }
-
     Object.keys(ownPackage.dependencies).forEach(key => {
       // For some reason optionalDependencies end up in dependencies after install
       if (ownPackage.optionalDependencies[key]) {
         return;
       }
-      console.log(`  Adding ${cyan(key)} to devDependencies`);
-      appPackage.devDependencies[key] = ownPackage.dependencies[key];
+      console.log(`  Adding ${cyan(key)} to dependencies`);
+      appPackage.dependencies[key] = ownPackage.dependencies[key];
     });
+    // Sort the deps
+    const unsortedDependencies = appPackage.dependencies;
+    appPackage.dependencies = {};
+    Object.keys(unsortedDependencies)
+      .sort()
+      .forEach(key => {
+        appPackage.dependencies[key] = unsortedDependencies[key];
+      });
     console.log();
+
     console.log(cyan('Updating the scripts'));
     delete appPackage.scripts['eject'];
     Object.keys(appPackage.scripts).forEach(key => {
       Object.keys(ownPackage.bin).forEach(binKey => {
         const regex = new RegExp(binKey + ' (\\w+)', 'g');
+        if (!regex.test(appPackage.scripts[key])) {
+          return;
+        }
         appPackage.scripts[key] = appPackage.scripts[key].replace(
           regex,
           'node scripts/$1.js'
         );
         console.log(
-          `  Replacing ${cyan(`"${binKey} ${key}"`)} with ${cyan(`"node scripts/${key}.js"`)}`
+          `  Replacing ${cyan(`"${binKey} ${key}"`)} with ${cyan(
+            `"node scripts/${key}.js"`
+          )}`
         );
       });
     });
@@ -199,9 +227,36 @@ inquirer
 
     fs.writeFileSync(
       path.join(appPath, 'package.json'),
-      JSON.stringify(appPackage, null, 2) + '\n'
+      JSON.stringify(appPackage, null, 2) + os.EOL
     );
     console.log();
+
+    if (fs.existsSync(paths.appTypeDeclarations)) {
+      try {
+        // Read app declarations file
+        let content = fs.readFileSync(paths.appTypeDeclarations, 'utf8');
+        const ownContent =
+          fs.readFileSync(paths.ownTypeDeclarations, 'utf8').trim() + os.EOL;
+
+        // Remove react-scripts reference since they're getting a copy of the types in their project
+        content =
+          content
+            // Remove react-scripts types
+            .replace(
+              /^\s*\/\/\/\s*<reference\s+types.+?"react-scripts".*\/>.*(?:\n|$)/gm,
+              ''
+            )
+            .trim() + os.EOL;
+
+        fs.writeFileSync(
+          paths.appTypeDeclarations,
+          (ownContent + os.EOL + content).trim() + os.EOL
+        );
+      } catch (e) {
+        // It's not essential that this succeeds, the TypeScript user should
+        // be able to re-create these types with ease.
+      }
+    }
 
     // "Don't destroy what isn't ours"
     if (ownPath.indexOf(appPath) === 0) {
@@ -217,11 +272,40 @@ inquirer
     }
 
     if (fs.existsSync(paths.yarnLockFile)) {
+      const windowsCmdFilePath = path.join(
+        appPath,
+        'node_modules',
+        '.bin',
+        'react-scripts.cmd'
+      );
+      let windowsCmdFileContent;
+      if (process.platform === 'win32') {
+        // https://github.com/facebook/create-react-app/pull/3806#issuecomment-357781035
+        // Yarn is diligent about cleaning up after itself, but this causes the react-scripts.cmd file
+        // to be deleted while it is running. This trips Windows up after the eject completes.
+        // We'll read the batch file and later "write it back" to match npm behavior.
+        try {
+          windowsCmdFileContent = fs.readFileSync(windowsCmdFilePath);
+        } catch (err) {
+          // If this fails we're not worse off than if we didn't try to fix it.
+        }
+      }
+
       console.log(cyan('Running yarn...'));
-      spawnSync('yarnpkg', [], { stdio: 'inherit' });
+      spawnSync('yarnpkg', ['--cwd', process.cwd()], { stdio: 'inherit' });
+
+      if (windowsCmdFileContent && !fs.existsSync(windowsCmdFilePath)) {
+        try {
+          fs.writeFileSync(windowsCmdFilePath, windowsCmdFileContent);
+        } catch (err) {
+          // If this fails we're not worse off than if we didn't try to fix it.
+        }
+      }
     } else {
       console.log(cyan('Running npm install...'));
-      spawnSync('npm', ['install'], { stdio: 'inherit' });
+      spawnSync('npm', ['install', '--loglevel', 'error'], {
+        stdio: 'inherit',
+      });
     }
     console.log(green('Ejected successfully!'));
     console.log();

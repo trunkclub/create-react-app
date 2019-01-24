@@ -1,36 +1,36 @@
-'use strict'
+'use strict';
 
-const path = require('path')
-const git = require('git-rev-sync')
-const commit = git.long()
+const path = require('path');
+const git = require('git-rev-sync');
+const commit = git.long();
 
 function getVersions(packagePath, modulesPath) {
   try {
-    const pkg = require(packagePath)
+    const pkg = require(packagePath);
     const pkgNames = [].concat(
       Object.keys(pkg.dependencies || {}),
       Object.keys(pkg.devDependencies || {})
-    )
+    );
     const versions = pkgNames
       .filter(name => name.startsWith('@trunkclub/'))
       .reduce((acc, name) => {
-        const modulePath = path.join(modulesPath, name, 'package.json')
+        const modulePath = path.join(modulesPath, name, 'package.json');
         try {
           return Object.assign({}, acc, {
             [name]: require(modulePath).version,
-          })
+          });
         } catch (e) {
-          return acc
+          return acc;
         }
-      }, {})
+      }, {});
     return {
       name: pkg.name,
       version: pkg.version,
       commit,
       dependencies: versions,
-    }
+    };
   } catch (e) {
-    return { error: `${e.name}: ${e.message}` }
+    return { error: `${e.name}: ${e.message}` };
   }
 }
 
@@ -38,28 +38,28 @@ function TrunkClubVersionsPlugin(options) {
   if (!options || !options.packagePath || !options.modulesPath) {
     throw new Error(
       'Missing config for TrunkClubVersionsPlugin. Options `packagePath` and `modulesPath` are required.'
-    )
+    );
   }
 
-  this.versionData = getVersions(options.packagePath, options.modulesPath)
+  this.versionData = getVersions(options.packagePath, options.modulesPath);
 }
 
 TrunkClubVersionsPlugin.prototype.apply = function(compiler) {
-  const file = JSON.stringify(this.versionData)
+  const file = JSON.stringify(this.versionData);
 
   compiler.plugin('emit', function(compilation, callback) {
     // Add a file to the webpack build
     compilation.assets['tcversions.json'] = {
       source() {
-        return file
+        return file;
       },
       size() {
-        return file.length
+        return file.length;
       },
-    }
+    };
 
-    callback()
-  })
-}
+    callback();
+  });
+};
 
-module.exports = TrunkClubVersionsPlugin
+module.exports = TrunkClubVersionsPlugin;

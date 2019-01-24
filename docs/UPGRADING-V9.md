@@ -1,6 +1,6 @@
 # Upgrading to v9
 
-*This doc assumes you have already upgraded to v8.*
+_This doc assumes you have already upgraded to v8._
 
 ## Build Errors
 

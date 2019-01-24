@@ -69,7 +69,7 @@ Add `PORT={your old port value here}` to your `development.env`
 
 ### Accessing envars
 
-#### **TC_** prefix
+#### **TC\_** prefix
 
 Only `PORT`, `NODE_ENV`, `PUBLIC_URL`, and environment variables starting with `TC_` are
 available within the bundle.

@@ -13,4 +13,4 @@ process.env.TC_ENV = process.env.TC_ENV || env;
 process.env.TC_CLIENT_APP_NAME = pkg.name;
 process.env.TC_CLIENT_APP_VERSION = pkg.version;
 process.env.TC_CLIENT_BUILD_COMMIT = git.long();
-process.env.TC_CLIENT_BUILD_TIME = (new Date()).toISOString();
+process.env.TC_CLIENT_BUILD_TIME = new Date().toISOString();
